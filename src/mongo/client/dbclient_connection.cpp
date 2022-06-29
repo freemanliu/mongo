@@ -216,9 +216,11 @@ bool DBClientConnection::connect(const HostAndPort& server,
 
 Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData applicationName) {
     auto connectStatus = connectSocketOnly(serverAddress);
+    LOG(1) << "xxx DBClientConnect::connect start" << endl;
     if (!connectStatus.isOK()) {
         return connectStatus;
     }
+    LOG(1) << "xxx DBClientConnect::connect statusOK" << endl;
 
     // NOTE: If the 'applicationName' parameter is a view of the '_applicationName' member, as
     // happens, for instance, in the call to DBClientConnection::connect from
@@ -233,17 +235,20 @@ Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData 
         _markFailed(kSetFlag);
         return swIsMasterReply.status;
     }
+    LOG(1) << "xxx DBClientConnect::connect swIsMasterReply ok" << endl;
 
     // Ensure that the isMaster response is "ok:1".
     auto isMasterStatus = getStatusFromCommandResult(swIsMasterReply.data);
     if (!isMasterStatus.isOK()) {
         return isMasterStatus;
     }
+    LOG(1) << "xxx DBClientConnect::connect isMasterStatus ok" << endl;
 
     auto swProtocolSet = rpc::parseProtocolSetFromIsMasterReply(swIsMasterReply.data);
     if (!swProtocolSet.isOK()) {
         return swProtocolSet.getStatus();
     }
+    LOG(1) << "xxx DBClientConnect::connect swProtocolSet ok" << endl;
 
     {
         // The Server Discovery and Monitoring (SDAM) specification identifies a replica set member
@@ -270,6 +275,8 @@ Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData 
         }
     }
 
+    LOG(1) << "xxx DBClientConnect::connect msgFieldExtractStatus ok" << endl;
+
     auto validateStatus =
         rpc::validateWireVersion(WireSpec::instance().outgoing, swProtocolSet.getValue().version);
     if (!validateStatus.isOK()) {
@@ -277,6 +284,7 @@ Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData 
 
         return validateStatus;
     }
+    LOG(1) << "xxx DBClientConnect::connect wireversion ok" << endl;
 
     _setServerRPCProtocols(swProtocolSet.getValue().protocolSet);
 
@@ -286,6 +294,7 @@ Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData 
     if (!negotiatedProtocol.isOK()) {
         return negotiatedProtocol.getStatus();
     }
+    LOG(1) << "xxx DBClientConnect::connect negotiatedProtocol ok" << endl;
 
     if (_hook) {
         auto validationStatus = _hook(swIsMasterReply);
@@ -295,6 +304,7 @@ Status DBClientConnection::connect(const HostAndPort& serverAddress, StringData 
             return validationStatus;
         }
     }
+    LOG(1) << "xxx DBClientConnect::connect swIsMasterReply ok" << endl;
 
     return Status::OK();
 }

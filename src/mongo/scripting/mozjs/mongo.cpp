@@ -829,6 +829,7 @@ void MongoExternalInfo::construct(JSContext* cx, JS::CallArgs args) {
     std::unique_ptr<DBClientBase> conn(cs.connect(appname.value_or("MongoDB Shell"), errmsg));
 
     if (!conn.get()) {
+        uasserted(ErrorCodes::InternalError, "xxx conn.get()");
         uasserted(ErrorCodes::InternalError, errmsg);
     }
 

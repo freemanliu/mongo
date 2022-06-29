@@ -62,7 +62,7 @@ std::unique_ptr<DBClientBase> ConnectionString::connect(StringData applicationNa
                 auto c = stdx::make_unique<DBClientConnection>(true, 0, newURI);
 
                 c->setSoTimeout(socketTimeout);
-                LOG(1) << "creating new connection to:" << server;
+                LOG(1) << "xxx creating new connection to:" << server;
                 if (!c->connect(server, applicationName, errmsg)) {
                     continue;
                 }
